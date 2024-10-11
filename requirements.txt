@@ -3,3 +3,4 @@ djangorestframework
 psycopg2
 python-dotenv
 djangorestframework-simplejwt
+drf-yasg
