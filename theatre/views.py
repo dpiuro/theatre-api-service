@@ -1,4 +1,5 @@
 from rest_framework import viewsets
+from rest_framework.permissions import IsAuthenticated
 
 from theatre.models import (
     Play,
@@ -31,7 +32,7 @@ class BaseViewSet(viewsets.ModelViewSet):
 class PlayViewSet(BaseViewSet):
     model = Play
     serializer_class = PlaySerializer
-
+    permission_classes = [IsAuthenticated]
 
 class TheatreHallViewSet(BaseViewSet):
     model = TheatreHall
