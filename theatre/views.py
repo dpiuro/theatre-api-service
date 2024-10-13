@@ -1,3 +1,4 @@
+from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import viewsets, filters, status
 from rest_framework.decorators import action
 from rest_framework.permissions import IsAdminUser
@@ -69,6 +70,8 @@ class GenreViewSet(BaseViewSet):
 class PerformanceViewSet(viewsets.ModelViewSet):
     queryset = Performance.objects.all()
     serializer_class = PerformanceSerializer
+    filter_backends = [DjangoFilterBackend]
+    filterset_fields = {'play__title': ['icontains']}
 
     @action(
         methods=["POST"],
