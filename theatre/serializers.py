@@ -27,6 +27,7 @@ class GenreSerializer(serializers.ModelSerializer):
 class PlaySerializer(serializers.ModelSerializer):
     actors = ActorSerializer(many=True)
     genres = GenreSerializer(many=True)
+    image = serializers.ImageField(max_length=None, use_url=True)
 
     class Meta:
         model = Play
