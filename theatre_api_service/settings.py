@@ -40,7 +40,8 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'rest_framework',
     'theatre',
-    "drf_yasg",
+    'user',
+    'drf_yasg',
     'django_filters',
 ]
 
@@ -142,3 +143,5 @@ REST_FRAMEWORK = {
             "user": "3/day",
     },
 }
+
+AUTH_USER_MODEL = 'user.User'

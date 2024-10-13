@@ -1,7 +1,7 @@
 from django_filters.rest_framework import DjangoFilterBackend
-from rest_framework import viewsets, filters, status
+from rest_framework import viewsets, filters, status, generics
 from rest_framework.decorators import action
-from rest_framework.permissions import IsAdminUser, IsAuthenticated
+from rest_framework.permissions import IsAdminUser, IsAuthenticated, AllowAny
 from rest_framework.response import Response
 
 from theatre.models import (
@@ -20,7 +20,7 @@ from theatre.serializers import (
     ReservationSerializer,
     TicketSerializer,
     ActorSerializer,
-    GenreSerializer, PerformanceImageSerializer, TicketCreateSerializer
+    GenreSerializer, PerformanceImageSerializer, TicketCreateSerializer, UserRegistrationSerializer
 )
 
 
@@ -115,3 +115,8 @@ class PerformanceViewSet(viewsets.ModelViewSet):
             return Response(serializer.data, status=status.HTTP_200_OK)
 
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class UserRegistrationView(generics.CreateAPIView):
+    serializer_class = UserRegistrationSerializer
+    permission_classes = [AllowAny]
