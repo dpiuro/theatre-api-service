@@ -80,11 +80,11 @@ class TicketCreateSerializer(serializers.ModelSerializer):
 User = get_user_model()
 
 class UserRegistrationSerializer(serializers.ModelSerializer):
-    password = serializers.CharField(write_only=True, min_length=8)
+    password = serializers.CharField(write_only=True)
 
     class Meta:
         model = User
-        fields = ('email', 'password')
+        fields = ['id', 'email', 'password']
 
     def create(self, validated_data):
         user = User.objects.create_user(

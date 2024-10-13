@@ -1,8 +1,10 @@
+from django.contrib.auth import authenticate, get_user_model
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import viewsets, filters, status, generics
 from rest_framework.decorators import action
 from rest_framework.permissions import IsAdminUser, IsAuthenticated, AllowAny
 from rest_framework.response import Response
+from rest_framework_simplejwt.tokens import RefreshToken
 
 from theatre.models import (
     Play,
@@ -120,3 +122,16 @@ class PerformanceViewSet(viewsets.ModelViewSet):
 class UserRegistrationView(generics.CreateAPIView):
     serializer_class = UserRegistrationSerializer
     permission_classes = [AllowAny]
+
+
+User = get_user_model()
+
+class RegisterViewSet(viewsets.ViewSet):
+    permission_classes = [AllowAny]
+
+    def create(self, request):
+        serializer = UserRegistrationSerializer(data=request.data)
+        if serializer.is_valid():
+            user = serializer.save()
+            return Response({"message": "User registered successfully"}, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
