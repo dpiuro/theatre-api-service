@@ -1,7 +1,7 @@
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import viewsets, filters, status
 from rest_framework.decorators import action
-from rest_framework.permissions import IsAdminUser
+from rest_framework.permissions import IsAdminUser, IsAuthenticated
 from rest_framework.response import Response
 
 from theatre.models import (
@@ -47,14 +47,41 @@ class ReservationViewSet(BaseViewSet):
     serializer_class = ReservationSerializer
 
 
-class TicketViewSet(BaseViewSet):
-    model = Ticket
-    serializer_class = TicketSerializer
+class TicketViewSet(viewsets.ModelViewSet):
+    queryset = Ticket.objects.all()
+    serializer_class = TicketCreateSerializer
+    permission_classes = [IsAuthenticated]
 
-    def get_serializer_class(self):
-        if self.action == 'create':
-            return TicketCreateSerializer
-        return TicketCreateSerializer
+    @action(detail=False, methods=['post'], url_path='book')
+    def book_ticket(self, request):
+        """Endpoint for booking a ticket"""
+        user = request.user
+
+        if user.is_anonymous:
+            return Response({"detail": "Authentication required."}, status=status.HTTP_401_UNAUTHORIZED)
+
+        try:
+            performance_id = int(request.data.get("performance"))
+            row = int(request.data.get("row"))
+            seat = int(request.data.get("seat"))
+        except (TypeError, ValueError):
+            return Response({"detail": "Invalid input. 'performance', 'row', and 'seat' must be integers."},
+                            status=status.HTTP_400_BAD_REQUEST)
+
+        if Ticket.objects.filter(performance_id=performance_id, row=row, seat=seat).exists():
+            return Response({"detail": "This seat is already booked."}, status=status.HTTP_400_BAD_REQUEST)
+
+        reservation, created = Reservation.objects.get_or_create(user=user)
+
+        ticket = Ticket.objects.create(
+            performance_id=performance_id,
+            row=row,
+            seat=seat,
+            reservation=reservation
+        )
+
+        serializer = TicketCreateSerializer(ticket)
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
 
 
 class ActorViewSet(BaseViewSet):
