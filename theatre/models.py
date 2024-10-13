@@ -22,6 +22,10 @@ class Play(models.Model):
     description = models.TextField()
     actors = models.ManyToManyField(Actor, related_name="plays")
     genres = models.ManyToManyField(Genre, related_name="plays")
+    image = models.ImageField(
+        upload_to="performances/",
+        blank=True, null=True
+    )
 
     def __str__(self):
         return self.title
