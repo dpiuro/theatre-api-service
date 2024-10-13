@@ -1,5 +1,6 @@
 from django.db import models
 from django.contrib.auth import get_user_model
+from rest_framework.exceptions import ValidationError
 
 
 class Actor(models.Model):
@@ -87,3 +88,23 @@ class Ticket(models.Model):
             f"Ticket {self.row}-{self.seat} for "
             f"{self.performance.play.title}"
         )
+
+    def clean(self):
+        if Ticket.objects.filter(
+            performance=self.performance,
+            row=self.row,
+            seat=self.seat
+        ).exists():
+            raise ValidationError(
+                f"Seat {self.row}-{self.seat} for this performance is already booked."
+            )
+
+        if self.row > self.performance.theatre_hall.rows or self.row < 1:
+            raise ValidationError(f"Row {self.row} is out of range for this theatre hall.")
+
+        if self.seat > self.performance.theatre_hall.seats_in_row or self.seat < 1:
+            raise ValidationError(f"Seat {self.seat} is out of range for this theatre hall.")
+
+    def save(self, *args, **kwargs):
+        self.clean()
+        super().save(*args, **kwargs)

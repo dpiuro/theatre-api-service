@@ -19,7 +19,7 @@ from theatre.serializers import (
     ReservationSerializer,
     TicketSerializer,
     ActorSerializer,
-    GenreSerializer, PerformanceImageSerializer
+    GenreSerializer, PerformanceImageSerializer, TicketCreateSerializer
 )
 
 
@@ -49,6 +49,11 @@ class ReservationViewSet(BaseViewSet):
 class TicketViewSet(BaseViewSet):
     model = Ticket
     serializer_class = TicketSerializer
+
+    def get_serializer_class(self):
+        if self.action == 'create':
+            return TicketCreateSerializer
+        return TicketCreateSerializer
 
 
 class ActorViewSet(BaseViewSet):
