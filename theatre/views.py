@@ -20,7 +20,7 @@ from theatre.serializers import (
     ReservationSerializer,
     TicketSerializer,
     ActorSerializer,
-    GenreSerializer, PerformanceImageSerializer, TicketCreateSerializer, UserRegistrationSerializer
+    GenreSerializer, PerformanceImageSerializer, TicketCreateSerializer, UserRegistrationSerializer, PlayImageSerializer
 )
 
 
@@ -32,9 +32,25 @@ class BaseViewSet(viewsets.ModelViewSet):
         return self.model.objects.all()
 
 
-class PlayViewSet(BaseViewSet):
-    model = Play
+class PlayViewSet(viewsets.ModelViewSet):
+    queryset = Play.objects.all()
     serializer_class = PlaySerializer
+
+    @action(
+        methods=["POST"],
+        detail=True,
+        url_path="upload-image",
+        permission_classes=[IsAdminUser],
+    )
+    def upload_image(self, request, pk=None):
+        play = self.get_object()
+        serializer = PlayImageSerializer(play, data=request.data)
+
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_200_OK)
+
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 class TheatreHallViewSet(BaseViewSet):
@@ -99,22 +115,6 @@ class PerformanceViewSet(viewsets.ModelViewSet):
     serializer_class = PerformanceSerializer
     filter_backends = [DjangoFilterBackend]
     filterset_fields = {'play__title': ['icontains']}
-
-    @action(
-        methods=["POST"],
-        detail=True,
-        url_path="upload-image",
-        permission_classes=[IsAdminUser],
-    )
-    def upload_image(self, request, pk=None):
-        performance = self.get_object()
-        serializer = PerformanceImageSerializer(performance, data=request.data)
-
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_200_OK)
-
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 class UserRegistrationView(generics.CreateAPIView):

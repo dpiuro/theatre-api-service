@@ -30,7 +30,7 @@ class PlaySerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Play
-        fields = ["id", "title", "description", "actors", "genres"]
+        fields = ["id", "title", "description", "actors", "genres", "image"]
 
 
 class TheatreHallSerializer(serializers.ModelSerializer):
@@ -91,3 +91,9 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
             password=validated_data['password']
         )
         return user
+
+
+class PlayImageSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Play
+        fields = ('id', 'image')

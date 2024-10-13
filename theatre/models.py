@@ -24,7 +24,7 @@ class Play(models.Model):
     actors = models.ManyToManyField(Actor, related_name="plays")
     genres = models.ManyToManyField(Genre, related_name="plays")
     image = models.ImageField(
-        upload_to="performances/",
+        upload_to="plays/",
         blank=True, null=True
     )
 
