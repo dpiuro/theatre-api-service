@@ -1,10 +1,10 @@
-from django.contrib.auth import authenticate, get_user_model
+from django.contrib.auth import get_user_model
 from django_filters.rest_framework import DjangoFilterBackend
-from rest_framework import viewsets, filters, status, generics
+from rest_framework import viewsets, status, generics
 from rest_framework.decorators import action
 from rest_framework.permissions import IsAdminUser, IsAuthenticated, AllowAny
 from rest_framework.response import Response
-from rest_framework_simplejwt.tokens import RefreshToken
+
 
 from theatre.models import (
     Play,
@@ -15,15 +15,14 @@ from theatre.models import (
     Actor,
     Genre,
 )
+from theatre.permissions import IsAdminOrReadOnly
 from theatre.serializers import (
     PlaySerializer,
     TheatreHallSerializer,
     PerformanceSerializer,
     ReservationSerializer,
-    TicketSerializer,
     ActorSerializer,
     GenreSerializer,
-    PerformanceImageSerializer,
     TicketCreateSerializer,
     UserRegistrationSerializer,
     PlayImageSerializer,
@@ -41,6 +40,7 @@ class BaseViewSet(viewsets.ModelViewSet):
 class PlayViewSet(viewsets.ModelViewSet):
     queryset = Play.objects.all()
     serializer_class = PlaySerializer
+    permission_classes = [IsAdminOrReadOnly]
 
     @action(
         methods=["POST"],
@@ -62,12 +62,12 @@ class PlayViewSet(viewsets.ModelViewSet):
 class TheatreHallViewSet(BaseViewSet):
     model = TheatreHall
     serializer_class = TheatreHallSerializer
-
+    permission_classes = [IsAdminOrReadOnly]
 
 class ReservationViewSet(BaseViewSet):
     model = Reservation
     serializer_class = ReservationSerializer
-
+    permission_classes = [IsAdminOrReadOnly]
 
 class TicketViewSet(viewsets.ModelViewSet):
     queryset = Ticket.objects.all()
@@ -92,7 +92,8 @@ class TicketViewSet(viewsets.ModelViewSet):
         except (TypeError, ValueError):
             return Response(
                 {
-                    "detail": "Invalid input. 'performance', 'row', and 'seat' must be integers."
+                    "detail": "Invalid input. 'performance', "
+                              "'row', and 'seat' must be integers."
                 },
                 status=status.HTTP_400_BAD_REQUEST,
             )
@@ -108,7 +109,9 @@ class TicketViewSet(viewsets.ModelViewSet):
         reservation, created = Reservation.objects.get_or_create(user=user)
 
         ticket = Ticket.objects.create(
-            performance_id=performance_id, row=row, seat=seat, reservation=reservation
+            performance_id=performance_id,
+            row=row, seat=seat,
+            reservation=reservation
         )
 
         serializer = TicketCreateSerializer(ticket)
@@ -118,23 +121,19 @@ class TicketViewSet(viewsets.ModelViewSet):
 class ActorViewSet(BaseViewSet):
     model = Actor
     serializer_class = ActorSerializer
-
+    permission_classes = [IsAdminOrReadOnly]
 
 class GenreViewSet(BaseViewSet):
     model = Genre
     serializer_class = GenreSerializer
-
+    permission_classes = [IsAdminOrReadOnly]
 
 class PerformanceViewSet(viewsets.ModelViewSet):
     queryset = Performance.objects.all()
     serializer_class = PerformanceSerializer
     filter_backends = [DjangoFilterBackend]
     filterset_fields = {"play__title": ["icontains"]}
-
-
-class UserRegistrationView(generics.CreateAPIView):
-    serializer_class = UserRegistrationSerializer
-    permission_classes = [AllowAny]
+    permission_classes = [IsAdminOrReadOnly]
 
 
 User = get_user_model()
@@ -146,7 +145,6 @@ class RegisterViewSet(viewsets.ViewSet):
     def create(self, request):
         serializer = UserRegistrationSerializer(data=request.data)
         if serializer.is_valid():
-            user = serializer.save()
             return Response(
                 {"message": "User registered successfully"},
                 status=status.HTTP_201_CREATED,

@@ -48,13 +48,18 @@ class Performance(models.Model):
     show_time = models.DateTimeField()
 
     def __str__(self):
-        return f"{self.play.title} in {self.theatre_hall.name} " f"on {self.show_time}"
+        return (
+            f"{self.play.title} in {self.theatre_hall.name} "
+            f"" f"on {self.show_time}"
+        )
 
 
 class Reservation(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     user = models.ForeignKey(
-        get_user_model(), on_delete=models.CASCADE, related_name="reservations"
+        get_user_model(),
+        on_delete=models.CASCADE,
+        related_name="reservations"
     )
 
     def __str__(self):
@@ -72,14 +77,18 @@ class Ticket(models.Model):
     )
 
     def __str__(self):
-        return f"Ticket {self.row}-{self.seat} for " f"{self.performance.play.title}"
+        return (
+            f"Ticket {self.row}-{self.seat} "
+            f"for " f"{self.performance.play.title}"
+        )
 
     def clean(self):
         if Ticket.objects.filter(
             performance=self.performance, row=self.row, seat=self.seat
         ).exists():
             raise ValidationError(
-                f"Seat {self.row}-{self.seat} for this performance is already booked."
+                f"Seat {self.row}-{self.seat} "
+                f"for this performance is already booked."
             )
 
         if self.row > self.performance.theatre_hall.rows or self.row < 1:
@@ -87,7 +96,10 @@ class Ticket(models.Model):
                 f"Row {self.row} is out of range for this theatre hall."
             )
 
-        if self.seat > self.performance.theatre_hall.seats_in_row or self.seat < 1:
+        if (
+                self.seat > self.performance.theatre_hall.seats_in_row
+                or self.seat < 1
+        ):
             raise ValidationError(
                 f"Seat {self.seat} is out of range for this theatre hall."
             )
