@@ -13,7 +13,7 @@ from theatre.models import (
     Reservation,
     Ticket,
     Actor,
-    Genre
+    Genre,
 )
 from theatre.serializers import (
     PlaySerializer,
@@ -22,7 +22,11 @@ from theatre.serializers import (
     ReservationSerializer,
     TicketSerializer,
     ActorSerializer,
-    GenreSerializer, PerformanceImageSerializer, TicketCreateSerializer, UserRegistrationSerializer, PlayImageSerializer
+    GenreSerializer,
+    PerformanceImageSerializer,
+    TicketCreateSerializer,
+    UserRegistrationSerializer,
+    PlayImageSerializer,
 )
 
 
@@ -70,32 +74,41 @@ class TicketViewSet(viewsets.ModelViewSet):
     serializer_class = TicketCreateSerializer
     permission_classes = [IsAuthenticated]
 
-    @action(detail=False, methods=['post'], url_path='book')
+    @action(detail=False, methods=["post"], url_path="book")
     def book_ticket(self, request):
         """Endpoint for booking a ticket"""
         user = request.user
 
         if user.is_anonymous:
-            return Response({"detail": "Authentication required."}, status=status.HTTP_401_UNAUTHORIZED)
+            return Response(
+                {"detail": "Authentication required."},
+                status=status.HTTP_401_UNAUTHORIZED,
+            )
 
         try:
             performance_id = int(request.data.get("performance"))
             row = int(request.data.get("row"))
             seat = int(request.data.get("seat"))
         except (TypeError, ValueError):
-            return Response({"detail": "Invalid input. 'performance', 'row', and 'seat' must be integers."},
-                            status=status.HTTP_400_BAD_REQUEST)
+            return Response(
+                {
+                    "detail": "Invalid input. 'performance', 'row', and 'seat' must be integers."
+                },
+                status=status.HTTP_400_BAD_REQUEST,
+            )
 
-        if Ticket.objects.filter(performance_id=performance_id, row=row, seat=seat).exists():
-            return Response({"detail": "This seat is already booked."}, status=status.HTTP_400_BAD_REQUEST)
+        if Ticket.objects.filter(
+            performance_id=performance_id, row=row, seat=seat
+        ).exists():
+            return Response(
+                {"detail": "This seat is already booked."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
 
         reservation, created = Reservation.objects.get_or_create(user=user)
 
         ticket = Ticket.objects.create(
-            performance_id=performance_id,
-            row=row,
-            seat=seat,
-            reservation=reservation
+            performance_id=performance_id, row=row, seat=seat, reservation=reservation
         )
 
         serializer = TicketCreateSerializer(ticket)
@@ -116,7 +129,7 @@ class PerformanceViewSet(viewsets.ModelViewSet):
     queryset = Performance.objects.all()
     serializer_class = PerformanceSerializer
     filter_backends = [DjangoFilterBackend]
-    filterset_fields = {'play__title': ['icontains']}
+    filterset_fields = {"play__title": ["icontains"]}
 
 
 class UserRegistrationView(generics.CreateAPIView):
@@ -126,6 +139,7 @@ class UserRegistrationView(generics.CreateAPIView):
 
 User = get_user_model()
 
+
 class RegisterViewSet(viewsets.ViewSet):
     permission_classes = [AllowAny]
 
@@ -133,5 +147,8 @@ class RegisterViewSet(viewsets.ViewSet):
         serializer = UserRegistrationSerializer(data=request.data)
         if serializer.is_valid():
             user = serializer.save()
-            return Response({"message": "User registered successfully"}, status=status.HTTP_201_CREATED)
+            return Response(
+                {"message": "User registered successfully"},
+                status=status.HTTP_201_CREATED,
+            )
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)

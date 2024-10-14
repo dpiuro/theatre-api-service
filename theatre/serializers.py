@@ -8,7 +8,7 @@ from theatre.models import (
     Reservation,
     Ticket,
     Actor,
-    Genre
+    Genre,
 )
 
 
@@ -77,19 +77,20 @@ class TicketCreateSerializer(serializers.ModelSerializer):
         model = Ticket
         fields = ("row", "seat", "performance", "reservation")
 
+
 User = get_user_model()
+
 
 class UserRegistrationSerializer(serializers.ModelSerializer):
     password = serializers.CharField(write_only=True)
 
     class Meta:
         model = User
-        fields = ['id', 'email', 'password']
+        fields = ["id", "email", "password"]
 
     def create(self, validated_data):
         user = User.objects.create_user(
-            email=validated_data['email'],
-            password=validated_data['password']
+            email=validated_data["email"], password=validated_data["password"]
         )
         return user
 
@@ -97,4 +98,4 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
 class PlayImageSerializer(serializers.ModelSerializer):
     class Meta:
         model = Play
-        fields = ('id', 'image')
+        fields = ("id", "image")

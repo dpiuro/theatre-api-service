@@ -7,7 +7,7 @@ from theatre.models import (
     TheatreHall,
     Performance,
     Reservation,
-    Ticket
+    Ticket,
 )
 
 
@@ -15,25 +15,31 @@ from theatre.models import (
 class ActorAdmin(admin.ModelAdmin):
     list_display = ("first_name", "last_name")
 
+
 @admin.register(Genre)
 class GenreAdmin(admin.ModelAdmin):
     list_display = ("name",)
+
 
 @admin.register(Play)
 class PlayAdmin(admin.ModelAdmin):
     list_display = ("title", "description")
 
+
 @admin.register(TheatreHall)
 class TheatreHallAdmin(admin.ModelAdmin):
     list_display = ("name", "rows", "seats_in_row")
+
 
 @admin.register(Performance)
 class PerformanceAdmin(admin.ModelAdmin):
     list_display = ("play", "theatre_hall", "show_time")
 
+
 @admin.register(Reservation)
 class ReservationAdmin(admin.ModelAdmin):
     list_display = ("user", "created_at")
+
 
 @admin.register(Ticket)
 class TicketAdmin(admin.ModelAdmin):
