@@ -1,6 +1,5 @@
-from django.contrib.auth import get_user_model
 from django_filters.rest_framework import DjangoFilterBackend
-from rest_framework import viewsets, status, generics
+from rest_framework import viewsets, status
 from rest_framework.decorators import action
 from rest_framework.permissions import IsAdminUser, IsAuthenticated, AllowAny
 from rest_framework.response import Response
@@ -38,7 +37,10 @@ class BaseViewSet(viewsets.ModelViewSet):
 
 
 class PlayViewSet(viewsets.ModelViewSet):
-    queryset = Play.objects.all()
+    queryset = (
+        Play.objects.all().prefetch_related
+        ("actors", "genres").order_by("id")
+    )
     serializer_class = PlaySerializer
     permission_classes = [IsAdminOrReadOnly]
 
@@ -129,14 +131,13 @@ class GenreViewSet(BaseViewSet):
     permission_classes = [IsAdminOrReadOnly]
 
 class PerformanceViewSet(viewsets.ModelViewSet):
-    queryset = Performance.objects.all()
+    queryset = (Performance.objects.all().select_related
+                ("play", "theatre_hall")
+                )
     serializer_class = PerformanceSerializer
     filter_backends = [DjangoFilterBackend]
     filterset_fields = {"play__title": ["icontains"]}
     permission_classes = [IsAdminOrReadOnly]
-
-
-User = get_user_model()
 
 
 class RegisterViewSet(viewsets.ViewSet):

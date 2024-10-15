@@ -1,1 +1,1 @@
-# -theatre-api-service
+-theatre-api-service
